@@ -43,3 +43,22 @@
 #define __NR_riscv_flush_icache (__NR_arch_specific_syscall + 15)
 #endif
 __SYSCALL(__NR_riscv_flush_icache, sys_riscv_flush_icache)
+
+#ifdef CONFIG_RISCV_UINTR
+
+#ifndef __NR_riscv_uintr_register_receiver
+#define __NR_riscv_uintr_register_receiver (__NR_arch_specific_syscall + 0)
+#endif
+__SYSCALL(__NR_riscv_uintr_register_receiver, sys_uintr_register_receiver)
+
+#ifndef __NR_riscv_uintr_create_fd
+#define __NR_riscv_uintr_create_fd (__NR_arch_specific_syscall + 2)
+#endif
+__SYSCALL(__NR_riscv_uintr_create_fd, sys_uintr_create_fd)
+
+#ifndef __NR_riscv_uintr_register_sender
+#define __NR_riscv_uintr_register_sender (__NR_arch_specific_syscall + 3)
+#endif
+__SYSCALL(__NR_riscv_uintr_register_sender, sys_uintr_register_sender)
+
+#endif

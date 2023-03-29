@@ -75,4 +75,13 @@ static inline int syscall_get_arch(struct task_struct *task)
 }
 
 asmlinkage long sys_riscv_flush_icache(uintptr_t, uintptr_t, uintptr_t);
+
+#ifdef CONFIG_RISCV_UINTR
+
+asmlinkage long sys_uintr_register_receiver(void);
+asmlinkage long sys_uintr_create_fd(u64);
+asmlinkage long sys_uintr_register_sender(int);
+
+#endif
+
 #endif	/* _ASM_RISCV_SYSCALL_H */

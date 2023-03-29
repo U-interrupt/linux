@@ -3,6 +3,8 @@
 
 #ifdef CONFIG_RISCV_UINTR
 
+#define UINTR_MAX_UIST_NR 256
+
 #endif /* CONFIG_RISCV_UINTR */
 
 #endif /* _ASM_RISCV_UINTR_H */

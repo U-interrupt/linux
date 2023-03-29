@@ -11,6 +11,7 @@
 #include <vdso/processor.h>
 
 #include <asm/ptrace.h>
+#include <asm/uintr.h>
 
 /*
  * This decides where the kernel will search for a free chunk of vm
@@ -39,6 +40,10 @@ struct thread_struct {
 	unsigned long s[12];	/* s[0]: frame pointer */
 	struct __riscv_d_ext_state fstate;
 	unsigned long bad_cause;
+#ifdef CONFIG_RISCV_UINTR
+	struct uintr_sender *ui_send;
+	struct uintr_receiver *ui_recv;
+#endif
 };
 
 /* Whitelist the fstate from the task_struct for hardened usercopy */
