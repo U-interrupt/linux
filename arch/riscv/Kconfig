@@ -663,6 +663,10 @@ config PORTABLE
 	select OF
 	select MMU
 
+config RISCV_UINTR
+	bool "User Interrupt Support"
+	default y
+
 menu "Power management options"
 
 source "kernel/power/Kconfig"

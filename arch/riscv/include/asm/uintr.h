@@ -1,0 +1,8 @@
+#ifndef _ASM_RISCV_UINTR_H
+#define _ASM_RISCV_UINTR_H
+
+#ifdef CONFIG_RISCV_UINTR
+
+#endif /* CONFIG_RISCV_UINTR */
+
+#endif /* _ASM_RISCV_UINTR_H */
