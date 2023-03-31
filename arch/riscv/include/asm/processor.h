@@ -41,8 +41,11 @@ struct thread_struct {
 	struct __riscv_d_ext_state fstate;
 	unsigned long bad_cause;
 #ifdef CONFIG_RISCV_UINTR
-	struct uintr_sender *ui_send;
-	struct uintr_receiver *ui_recv;
+	struct uintr_sender *ui_send; /* user interrupt sender */
+	struct uintr_receiver *ui_recv; /* user interrupt receiver */
+	// u64 utvec; /* user trap vector */
+	// u64 uscratch; /* user trap handler */
+	// u64 uepc; /* user error pc */
 #endif
 };
 

@@ -24,6 +24,7 @@
 #include <asm/switch_to.h>
 #include <asm/thread_info.h>
 #include <asm/cpuidle.h>
+#include <asm/uintr.h>
 
 register unsigned long gp_in_global __asm__("gp");
 
@@ -186,4 +187,9 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 	}
 	p->thread.sp = (unsigned long)childregs; /* kernel sp */
 	return 0;
+}
+
+void exit_thread(struct task_struct *tsk)
+{
+	uintr_free(tsk);
 }

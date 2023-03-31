@@ -18,9 +18,11 @@
 struct uintc_priv {
 	struct cpumask lmask;
 	void __iomem *regs;
+	resource_size_t start;
 	resource_size_t size;
 	u32 nr;
 	void *mask;
+	spinlock_t lock;
 };
 
 struct uintc_handler {
@@ -30,8 +32,8 @@ struct uintc_handler {
 
 static DEFINE_PER_CPU(struct uintc_handler, uintc_handlers);
 
-static int __init uintc_init(struct device_node *node,
-			     struct device_node *parent)
+static int __init __uintc_init(struct device_node *node,
+			       struct device_node *parent)
 {
 	int error = 0, nr_contexts, i;
 	struct uintc_priv *priv;
@@ -47,9 +49,7 @@ static int __init uintc_init(struct device_node *node,
 		goto out_free;
 	}
 
-	/* Initialize suicfg resgiter for U-mode UIPI instruction  */
-	csr_write(CSR_SUICFG, uintc_res.start);
-
+	priv->start = uintc_res.start;
 	priv->size = resource_size(&uintc_res);
 	priv->nr = priv->size / UINTC_WIDTH;
 	priv->regs = ioremap(uintc_res.start, priv->size);
@@ -63,6 +63,8 @@ static int __init uintc_init(struct device_node *node,
 		error = -ENOMEM;
 		goto out_iounmap;
 	}
+
+	spin_lock_init(&priv->lock);
 
 	error = -EINVAL;
 	nr_contexts = of_irq_count(node);
@@ -116,25 +118,45 @@ out_free:
 	return error;
 }
 
-IRQCHIP_DECLARE(riscv_uintc, "riscv,uintc0", uintc_init);
+IRQCHIP_DECLARE(riscv_uintc, "riscv,uintc0", __uintc_init);
 
-int uintc_alloc(void)
+int uintc_init(void)
 {
-	int nr;
 	struct uintc_handler *handler;
 
 	handler = this_cpu_ptr(&uintc_handlers);
 	if (!handler->present)
-		return -EINVAL;
+		return -ENODEV;
 
+	/* Initialize suicfg resgiter for U-mode UIPI instruction  */
+	csr_write(CSR_SUICFG, handler->priv->start);
+
+	return 0;
+}
+
+int uintc_alloc(void)
+{
+	int nr;
+	unsigned long flags;
+	struct uintc_handler *handler;
+
+	handler = this_cpu_ptr(&uintc_handlers);
+	if (!handler->present)
+		return -ENODEV;
+
+	spin_lock_irqsave(&handler->priv->lock, flags);
 	nr = find_first_zero_bit(handler->priv->mask, handler->priv->nr);
-
+	if (nr >= handler->priv->nr)
+		return -ENOSPC;
 	set_bit(nr, handler->priv->mask);
+	spin_unlock_irqrestore(&handler->priv->lock, flags);
+
 	return nr;
 }
 
 int uintc_dealloc(int index)
 {
+	unsigned long flags;
 	struct uintc_handler *handler;
 
 	handler = this_cpu_ptr(&uintc_handlers);
@@ -144,8 +166,9 @@ int uintc_dealloc(int index)
 	if (index >= handler->priv->nr)
 		return -EINVAL;
 
+	spin_lock_irqsave(&handler->priv->lock, flags);
 	clear_bit(index, handler->priv->mask);
-
+	spin_unlock_irqrestore(&handler->priv->lock, flags);
 	return 0;
 }
 

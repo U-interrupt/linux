@@ -51,6 +51,12 @@ struct pt_regs {
 	unsigned long cause;
 	/* a0 value before the syscall */
 	unsigned long orig_a0;
+#ifdef CONFIG_RISCV_UINTR
+	/* User CSRs */
+	unsigned long utvec;
+	unsigned long uscratch;
+	unsigned long uepc;
+#endif
 };
 
 #ifdef CONFIG_64BIT

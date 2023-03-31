@@ -251,6 +251,8 @@
 #define CSR_STVAL		0x143
 #define CSR_SIP			0x144
 #define CSR_SATP		0x180
+#define CSR_SEDELEG         0x102
+#define CSR_SIDELEG         0x103
 
 #define CSR_STIMECMP		0x14D
 #define CSR_STIMECMPH		0x15D

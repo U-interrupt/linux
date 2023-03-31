@@ -88,12 +88,18 @@ _save_context:
 	csrr s3, CSR_TVAL
 	csrr s4, CSR_CAUSE
 	csrr s5, CSR_SCRATCH
+	csrr s6, CSR_UTVEC
+	csrr s7, CSR_USCRATCH
+	csrr s8, CSR_UEPC
 	REG_S s0, PT_SP(sp)
 	REG_S s1, PT_STATUS(sp)
 	REG_S s2, PT_EPC(sp)
 	REG_S s3, PT_BADADDR(sp)
 	REG_S s4, PT_CAUSE(sp)
 	REG_S s5, PT_TP(sp)
+	REG_S s6, PT_UTVEC(sp)
+	REG_S s7, PT_USCRATCH(sp)
+	REG_S s8, PT_UEPC(sp)
 
 	/*
 	 * Set the scratch register to 0, so that if a recursive exception
@@ -264,6 +270,9 @@ ret_from_exception:
 	bnez s0, resume_kernel
 
 resume_userspace:
+	move a0, sp
+	call riscv_uintr_restore
+
 	/* Interrupts must be disabled here so flags are checked atomically */
 	REG_L s0, TASK_TI_FLAGS(tp) /* current_thread_info->flags */
 	andi s1, s0, _TIF_WORK_MASK

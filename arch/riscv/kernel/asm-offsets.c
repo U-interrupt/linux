@@ -114,6 +114,12 @@ void asm_offsets(void)
 	OFFSET(PT_BADADDR, pt_regs, badaddr);
 	OFFSET(PT_CAUSE, pt_regs, cause);
 
+#ifdef CONFIG_RISCV_UINTR
+	OFFSET(PT_UTVEC, pt_regs, utvec);
+	OFFSET(PT_USCRATCH, pt_regs, uscratch);
+	OFFSET(PT_UEPC, pt_regs, uepc);
+#endif
+
 	OFFSET(SUSPEND_CONTEXT_REGS, suspend_context, regs);
 
 	OFFSET(KVM_ARCH_GUEST_ZERO, kvm_vcpu_arch, guest_context.zero);
