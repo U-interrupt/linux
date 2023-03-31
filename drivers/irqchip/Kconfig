@@ -549,6 +549,16 @@ config SIFIVE_PLIC
 
 	   If you don't know what to do here, say Y.
 
+config RISCV_UINTC
+	bool "RISC-V User Interrupt Controller"
+	depends on RISCV
+	default y
+	help
+		This enables support for the UINTC. The UINTC connects U-mode
+		software interrupt pending bit of each HART.
+
+		If you don't know what to do here, say Y.
+
 config EXYNOS_IRQ_COMBINER
 	bool "Samsung Exynos IRQ combiner support" if COMPILE_TEST
 	depends on (ARCH_EXYNOS && ARM) || COMPILE_TEST
