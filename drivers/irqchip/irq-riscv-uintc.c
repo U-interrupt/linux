@@ -204,8 +204,8 @@ int uintc_read_low(int index, u64 *value)
 
 	reg = handler->priv->regs + index * UINTC_WIDTH + 0x8;
 
-	*value = readq(reg);
-
+	if (value)
+		*value = readq(reg);
 	return 0;
 }
 
@@ -241,7 +241,8 @@ int uintc_read_high(int index, u64 *value)
 
 	reg = handler->priv->regs + index * UINTC_WIDTH + 0x10;
 
-	*value = readq(reg);
+	if (value)
+		*value = readq(reg);
 	return 0;
 }
 

@@ -11,7 +11,9 @@
 #include <asm/uintr.h>
 #include <asm/unistd.h>
 
-#define pr_fmt(fmt) "[CPU %d] %s: [%-35s]: " fmt, smp_processor_id(), KBUILD_MODNAME, __func__
+#define pr_fmt(fmt)                                                       \
+	"[CPU %d] %s: [%-35s]: " fmt, smp_processor_id(), KBUILD_MODNAME, \
+		__func__
 
 /* User Interrupt Sender Status Table Entry (UISTE) */
 struct uist_entry {
@@ -229,9 +231,10 @@ SYSCALL_DEFINE0(uintr_register_receiver)
 
 	/* clear pending bits */
 	uintc_write_low(ret, 0UL);
-	uintc_write_high(ret, 0UL);
+	uintc_read_high(ret, NULL);
 
 	ui_recv->task = get_task_struct(t);
+	ui_recv->uirs_index = ret;
 
 	t->thread.ui_recv = ui_recv;
 
@@ -396,9 +399,10 @@ void uintr_recv_restore(struct pt_regs *regs)
 	csr_write(CSR_UTVEC, regs->utvec);
 	csr_write(CSR_USCRATCH, regs->uscratch);
 
-	pr_err("uirs restore: index=%d irq=%llu utvec=0x%lx uepc=0x%lx uscratch=0x%lx\n",
-	       (u32)ui_recv->uirs_index, uirs.irq, regs->utvec, regs->uepc,
-	       regs->uscratch);
+	// if (uirs.irq)
+	// 	pr_err("uirs restore: index=%d irq=%llu utvec=0x%lx uepc=0x%lx uscratch=0x%lx\n",
+	// 	       (u32)ui_recv->uirs_index, uirs.irq, regs->utvec,
+	// 	       regs->uepc, regs->uscratch);
 
 	csr_write(CSR_SUIRS, (1UL << 63) | ui_recv->uirs_index);
 	csr_set(CSR_SIDELEG, IE_USIE);
