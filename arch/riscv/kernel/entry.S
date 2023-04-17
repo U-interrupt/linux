@@ -88,19 +88,26 @@ _save_context:
 	csrr s3, CSR_TVAL
 	csrr s4, CSR_CAUSE
 	csrr s5, CSR_SCRATCH
-	csrr s6, CSR_UTVEC
-	csrr s7, CSR_USCRATCH
-	csrr s8, CSR_UEPC
 	REG_S s0, PT_SP(sp)
 	REG_S s1, PT_STATUS(sp)
 	REG_S s2, PT_EPC(sp)
 	REG_S s3, PT_BADADDR(sp)
 	REG_S s4, PT_CAUSE(sp)
 	REG_S s5, PT_TP(sp)
+
+#ifdef CONFIG_RISCV_UINTR
+	# Save uintr registers
+	csrr s6, CSR_UTVEC
+	csrr s7, CSR_USCRATCH
+	csrr s8, CSR_UEPC
 	REG_S s6, PT_UTVEC(sp)
 	REG_S s7, PT_USCRATCH(sp)
 	REG_S s8, PT_UEPC(sp)
-
+	
+	# UIPI_DEACTIVATE
+	# deactivate uintc status 
+	.insn i 0b1111011, 0b010, x0, x0, 0x4
+#endif
 	/*
 	 * Set the scratch register to 0, so that if a recursive exception
 	 * occurs, the exception vector knows it came from the kernel
@@ -359,6 +366,14 @@ restore_all:
 	REG_L x31, PT_T6(sp)
 
 	REG_L x2,  PT_SP(sp)
+
+#ifdef CONFIG_RISCV_UINTR
+	# UIPI_ACTIVATE
+	# activate uintc status
+	# suirs must have been set in the latest riscv_uintr_restore
+	.insn i 0b1111011, 0b010, x0, x0, 0x3
+#endif
+
 
 #ifdef CONFIG_RISCV_M_MODE
 	mret

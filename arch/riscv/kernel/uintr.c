@@ -297,6 +297,7 @@ SYSCALL_DEFINE1(uintr_register_sender, int, uintrfd)
 		return -EBADF;
 
 	if (uintr_f->f_op != &uintrfd_fops) {
+		pr_err("Wrong uintrfd=%d\n", uintrfd);
 		ret = -EOPNOTSUPP;
 		goto out_fdput;
 	}
@@ -392,7 +393,7 @@ void uintr_recv_restore(struct pt_regs *regs)
 
 	load_uirs(ui_recv->uirs_index, &uirs);
 	uirs.hartid = smp_processor_id();
-	uirs.mode |= 0x2;
+	uirs.mode = 0x2;
 	store_uirs(ui_recv->uirs_index, &uirs);
 
 	csr_write(CSR_UEPC, regs->uepc);
