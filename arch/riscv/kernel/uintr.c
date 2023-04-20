@@ -382,9 +382,12 @@ void uintr_recv_restore(struct pt_regs *regs)
 	struct uintr_receiver *ui_recv;
 	struct uirs_entry uirs;
 
+	/* always delegate user interrupt to read/write uie and uip */
+	csr_set(CSR_SIDELEG, IE_USIE);
+
 	if (!is_uintr_receiver(t)) {
 		csr_write(CSR_SUIRS, 0UL);
-		csr_clear(CSR_SIDELEG, IE_USIE);
+		csr_clear(CSR_UIE, IE_USIE);
 		csr_clear(CSR_UIP, IE_USIE);
 		return;
 	}
@@ -395,23 +398,23 @@ void uintr_recv_restore(struct pt_regs *regs)
 	uirs.hartid = smp_processor_id();
 	uirs.mode = 0x2;
 	store_uirs(ui_recv->uirs_index, &uirs);
+	csr_write(CSR_SUIRS, (1UL << 63) | ui_recv->uirs_index);
 
-	csr_write(CSR_UEPC, regs->uepc);
-	csr_write(CSR_UTVEC, regs->utvec);
-	csr_write(CSR_USCRATCH, regs->uscratch);
+	csr_set(CSR_UIE, IE_USIE);
+	if (uirs.irq)
+		csr_set(CSR_UIP, IE_USIE);
+	else
+		csr_clear(CSR_UIP, IE_USIE);
 
 	// if (uirs.irq)
 	// 	pr_err("uirs restore: index=%d irq=%llu utvec=0x%lx uepc=0x%lx uscratch=0x%lx\n",
 	// 	       (u32)ui_recv->uirs_index, uirs.irq, regs->utvec,
 	// 	       regs->uepc, regs->uscratch);
 
-	csr_write(CSR_SUIRS, (1UL << 63) | ui_recv->uirs_index);
-	csr_set(CSR_SIDELEG, IE_USIE);
-	csr_set(CSR_UIE, IE_USIE);
-	if (uirs.irq)
-		csr_set(CSR_UIP, IE_USIE);
-	else
-		csr_clear(CSR_UIP, IE_USIE);
+	/* restore U-mode CSRs */
+	csr_write(CSR_UEPC, regs->uepc);
+	csr_write(CSR_UTVEC, regs->utvec);
+	csr_write(CSR_USCRATCH, regs->uscratch);
 }
 
 void uintr_send_restore(void)
