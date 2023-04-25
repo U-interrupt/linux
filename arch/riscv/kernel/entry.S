@@ -106,7 +106,7 @@ _save_context:
 	
 	# UIPI_DEACTIVATE
 	# deactivate uintc status 
-	.insn i 0b1111011, 0b010, x0, x0, 0x4
+	.insn r 0b1111011, 0b010, 0b0000100, x0, x0, x0
 #endif
 	/*
 	 * Set the scratch register to 0, so that if a recursive exception
@@ -371,7 +371,7 @@ restore_all:
 	# UIPI_ACTIVATE
 	# activate uintc status
 	# suirs must have been set in the latest riscv_uintr_restore
-	.insn i 0b1111011, 0b010, x0, x0, 0x3
+	.insn r 0b1111011, 0b010, 0b0000011, x0, x0, x0
 #endif
 
 
