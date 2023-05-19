@@ -128,9 +128,6 @@ int uintc_init(void)
 	if (!handler->present)
 		return -ENODEV;
 
-	/* Initialize suicfg resgiter for U-mode UIPI instruction  */
-	csr_write(CSR_SUICFG, handler->priv->start);
-
 	return 0;
 }
 
