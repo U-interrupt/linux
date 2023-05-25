@@ -1,3 +1,4 @@
+#include "linux/bitmap.h"
 #define pr_fmt(fmt) "riscv-uintc: " fmt
 
 #include <linux/cpu.h>
@@ -63,6 +64,8 @@ static int __init __uintc_init(struct device_node *node,
 		error = -ENOMEM;
 		goto out_iounmap;
 	}
+	bitmap_clear(priv->mask, 0, priv->nr);
+	bitmap_set(priv->mask, 1, 4);
 
 	spin_lock_init(&priv->lock);
 
@@ -119,17 +122,6 @@ out_free:
 }
 
 IRQCHIP_DECLARE(riscv_uintc, "riscv,uintc0", __uintc_init);
-
-int uintc_init(void)
-{
-	struct uintc_handler *handler;
-
-	handler = this_cpu_ptr(&uintc_handlers);
-	if (!handler->present)
-		return -ENODEV;
-
-	return 0;
-}
 
 int uintc_alloc(void)
 {

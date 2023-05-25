@@ -106,7 +106,7 @@ _save_context:
 	
 	# UIPI_DEACTIVATE
 	# deactivate uintc status 
-	.insn r 0b1111011, 0b010, 0b0000100, x0, x0, x0
+	.insn r 0b1111011, 0b110, 0b0000100, x0, x0, x0
 #endif
 	/*
 	 * Set the scratch register to 0, so that if a recursive exception
@@ -277,9 +277,6 @@ ret_from_exception:
 	bnez s0, resume_kernel
 
 resume_userspace:
-	move a0, sp
-	call riscv_uintr_restore
-
 	/* Interrupts must be disabled here so flags are checked atomically */
 	REG_L s0, TASK_TI_FLAGS(tp) /* current_thread_info->flags */
 	andi s1, s0, _TIF_WORK_MASK
@@ -309,6 +306,10 @@ restore_all:
 1:
 	call __trace_hardirqs_off
 2:
+#endif
+#ifdef CONFIG_RISCV_UINTR
+	move a0, sp
+	call riscv_uintr_restore
 #endif
 	REG_L a0, PT_STATUS(sp)
 	/*
@@ -366,14 +367,6 @@ restore_all:
 	REG_L x31, PT_T6(sp)
 
 	REG_L x2,  PT_SP(sp)
-
-#ifdef CONFIG_RISCV_UINTR
-	# UIPI_ACTIVATE
-	# activate uintc status
-	# suirs must have been set in the latest riscv_uintr_restore
-	.insn r 0b1111011, 0b010, 0b0000011, x0, x0, x0
-#endif
-
 
 #ifdef CONFIG_RISCV_M_MODE
 	mret
