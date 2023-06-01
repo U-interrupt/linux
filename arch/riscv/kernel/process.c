@@ -186,6 +186,10 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 		p->thread.ra = (unsigned long)ret_from_fork;
 	}
 	p->thread.sp = (unsigned long)childregs; /* kernel sp */
+
+	p->thread.ui_recv = NULL;
+	p->thread.ui_send = NULL;
+
 	return 0;
 }
 
