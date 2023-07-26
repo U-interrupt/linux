@@ -3267,7 +3267,6 @@ MODULE_DEVICE_TABLE(of, axienet_of_match);
  */
 static int axienet_probe(struct platform_device *pdev)
 {
-	printk("axienet_probe\n");
 	int (*axienet_clk_init)(struct platform_device *pdev,
 				struct clk **axi_aclk, struct clk **axis_clk,
 				struct clk **ref_clk, struct clk **tmpclk) =
@@ -3686,7 +3685,9 @@ static int axienet_probe(struct platform_device *pdev)
 			goto cleanup_mdio;
 		}
 		if (np) {
+			printk("here---------------\n");
 			ret = axienet_mdio_setup(lp);
+			printk("there---------------\n");
 			if (ret)
 				dev_warn(&pdev->dev,
 					 "error registering MDIO bus: %d\n", ret);
