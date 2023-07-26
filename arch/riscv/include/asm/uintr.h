@@ -10,8 +10,6 @@
 struct pt_regs;
 struct task_struct;
 
-int uintc_init(void);
-
 int uintc_alloc(void);
 int uintc_dealloc(int index);
 
